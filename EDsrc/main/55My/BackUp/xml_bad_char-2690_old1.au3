@@ -13,28 +13,28 @@ GUISetIcon("..\..\..\..\..\..\..\..\icon\7i.ico")
 ;; zuerst Umlaut/Kodierungskorrektur, dann XML-Sanitierung
 ;; ergaenzt um Unicode-Bewusstsein (Surrogate), Logging und Backup
 
-If 1 Then
-	$clean = cleanStr("Beispieltext mit Ã¼ und " & Chr(0) & " ungültigen XML-Bytes")
-	ConsoleWrite('@@ Debug(' & @ScriptLineNumber & ') : $clean = ' & $clean & @CRLF & '>Error code: ' & @error & @CRLF) ;### Debug Console
+if 1 then
+$clean = cleanStr("Beispieltext mit Ã¼ und " & Chr(0) & " ungültigen XML-Bytes")
+ConsoleWrite('@@ Debug(' & @ScriptLineNumber & ') : $clean = ' & $clean & @CRLF & '>Error code: ' & @error & @CRLF) ;### Debug Console
 EndIf
 
 ;; badChar  String
 Func StripInvalidXML($s)  ;; string
-	If StringLen($s) = 0 Then Return ""
-	Local $out = ""
-	For $i = 1 To StringLen($s)
-		Local $ch = StringMid($s, $i, 1)
-		Local $c = AscW($ch)
-		If $c = 9 Or $c = 10 Or $c = 13 Or ($c >= 32 And $c <= 0xD7FF) Or ($c >= 0xE000 And $c <= 0xFFFD) Then
-			$out &= $ch
-		Else
-			$out &= " "
-		EndIf
-	Next
-	Return $out
-EndFunc   ;==>StripInvalidXML
-Func umlaut($s)
-	Local $out = $s
+    If StringLen($s) = 0 Then Return ""
+    Local $out = ""
+    For $i = 1 To StringLen($s)
+        Local $ch = StringMid($s, $i, 1)
+        Local $c = AscW($ch)
+        If $c = 9 Or $c = 10 Or $c = 13 Or ($c >= 32 And $c <= 0xD7FF) Or ($c >= 0xE000 And $c <= 0xFFFD) Then
+            $out &= $ch
+        Else
+            $out &= " "
+        EndIf
+    Next
+    Return $out
+EndFunc
+func umlaut($s)
+	local $out = $s
 	;; ## string due ##
 	; ==========================================================
 	; SET 1: Korrektur für korrekte Umlaute (falls der Input fehlerfrei war)
@@ -49,26 +49,26 @@ Func umlaut($s)
 	$out = StringReplace($out, 'Ü', 'Ue')
 	$out = StringReplace($out, "€", "EUR")
 
-	$out = StringReplace($out, "ÃƒÂ¼", "ue") ;;   ; e.g., DrÃƒÂ¼cken -> Drücken
-	$out = StringReplace($out, "ÃƒÂ¤", "ae") ;;   ; e.g., GerÃƒÂ¤te -> Geräte
-	$out = StringReplace($out, "ÃƒÂ¶", "oe") ;;   ; e.g., kÃƒÂ¶nnen -> können
-	$out = StringReplace($out, "ÃƒÂŸ", "s") ;;   ; e.g., hauptsÃƒÂ¤chlich -> hauptsächlich
-	$out = StringReplace($out, "ÃƒÂ„", "Ae") ;;   ; rare, but possible
-	$out = StringReplace($out, "ÃƒÂ–", "Oe") ;;   ; rare, but possible
-	$out = StringReplace($out, "ÃƒÂœ", "Ue") ;;   ; rare, but possible
-	$out = StringReplace($out, "Ã¢â‚¬â„¢", "'") ;;  ; e.g., doesnÃ¢â‚¬â„¢t -> doesn’t
-	$out = StringReplace($out, "Ã¢â‚¬Å“", '"') ;;  ; left double quote
-	$out = StringReplace($out, "Ã¢â‚¬Â", "—") ;;   ; em dash
-	$out = StringReplace($out, "Ã¢â€šÂ¬", "EUR") ;;   ; Euro symbol
+	$out = StringReplace($out,"ÃƒÂ¼", "ue" ) ;;   ; e.g., DrÃƒÂ¼cken -> Drücken
+	$out = StringReplace($out,"ÃƒÂ¤", "ae" ) ;;   ; e.g., GerÃƒÂ¤te -> Geräte
+	$out = StringReplace($out,"ÃƒÂ¶", "oe" ) ;;   ; e.g., kÃƒÂ¶nnen -> können
+	$out = StringReplace($out,"ÃƒÂŸ", "s" ) ;;   ; e.g., hauptsÃƒÂ¤chlich -> hauptsächlich
+	$out = StringReplace($out,"ÃƒÂ„", "Ae" ) ;;   ; rare, but possible
+	$out = StringReplace($out,"ÃƒÂ–", "Oe" ) ;;   ; rare, but possible
+	$out = StringReplace($out,"ÃƒÂœ", "Ue" ) ;;   ; rare, but possible
+	$out = StringReplace($out,"Ã¢â‚¬â„¢", "'" ) ;;  ; e.g., doesnÃ¢â‚¬â„¢t -> doesn’t
+	$out = StringReplace($out,"Ã¢â‚¬Å“", '"' ) ;;  ; left double quote
+	$out = StringReplace($out,"Ã¢â‚¬Â", "—" ) ;;   ; em dash
+	$out = StringReplace($out,"Ã¢â€šÂ¬", "EUR") ;;   ; Euro symbol
 
 	;;// linken // rechte doppelte Anführungsstrich ( ' „ ' oder  ' “ ” " ')
 	;;//  Kurzfazit: Ersetze //// "Ã¢â‚¬Å“" ? “  ////  "Ã¢â‚¬Â" ? ”  ////  "â€œ" ? “  ////  "â€?" ? ”  ////  "â€”" ? —  ////
 
-	$out = StringReplace($out, "Ã¢â‚¬Â", '"')  ;;  ; left double quote
-	$out = StringReplace($out, "Ã¢â‚¬Å“", '"')  ;;  ; left double quote
-	$out = StringReplace($out, "Ã¢â‚¬?", '"')   ;;  ; right double quote
-	$out = StringReplace($out, "â€?", '"')      ;; common UTF-8?ANSI Fehler für rechte Anführungszeichen
-	$out = StringReplace($out, "â€œ", '"')      ;;  linke Anführungszeichen
+	$out = StringReplace($out, "Ã¢â‚¬Â",  '"') ;;  ; left double quote
+	$out = StringReplace($out, "Ã¢â‚¬Å“", '"' ) ;;  ; left double quote
+	$out = StringReplace($out, "Ã¢â‚¬?",  '"')  ;;  ; right double quote
+	$out=StringReplace(  $out, "â€?", '"' )     ;; common UTF-8?ANSI Fehler für rechte Anführungszeichen
+	$out=StringReplace(  $out, "â€œ", '"' )     ;;  linke Anführungszeichen
 	$out = StringReplace($out, "â€œ", '"')     ; left double quote (UTF-8 as ANSI)
 	$out = StringReplace($out, "â??", '"')     ; right double quote (UTF-8 as ANSI)
 	$out = StringReplace($out, "â€”", "—")     ; em dash
@@ -88,58 +88,58 @@ Func umlaut($s)
 	$out = StringReplace($out, 'Ãœ', 'Ue')   ; UTF-8 'Ü' als ANSI gelesen
 
 	;; ## string due  end ##
-	Return $out
+    return $out
 
 
-	If 0 Then
-		;; alternative with  2D array[][] StringReplace
-		Local $res
+	   if 0 Then
+       ;; alternative with  2D array[][] StringReplace
+        local	$res
 		Local $aAsciiReplacements = [ _
-				["ä", "ae"], _
-				["ö", "oe"], _
-				["ü", "ue"], _
-				["ß", "ss"], _
-				["Ä", "Ae"], _
-				["Ö", "Oe"], _
-				["Ü", "Ue"], _
-				["€", "EUR"] _
-				]
+			["ä", "ae"], _
+			["ö", "oe"], _
+			["ü", "ue"], _
+			["ß", "ss"], _
+			["Ä", "Ae"], _
+			["Ö", "Oe"], _
+			["Ü", "Ue"], _
+			["€", "EUR"] _
+		]
 		For $i = 0 To UBound($aAsciiReplacements) - 1
-			$res = StringReplace($res, $aAsciiReplacements[$i][0], $aAsciiReplacements[$i][1], 0, 1)
+		$res = StringReplace($res, $aAsciiReplacements[$i][0], $aAsciiReplacements[$i][1], 0, 1)
 		Next
-	EndIf
-EndFunc   ;==>umlaut
+    EndIf
+EndFunc
 Func cleanStr($s)
-	$s = umlaut($s)
-	Return StripInvalidXML($s)
-EndFunc   ;==>cleanStr
+  $s = umlaut($s)
+  return StripInvalidXML($s)
+EndFunc
 ;; badChar  File
-Func badCharFil($inFil, $outFil)
-	; Read the file
-	;local  $inFil ="in.txt"
+Func badCharFil($inFil , $outFil)
+    ; Read the file
+    ;local  $inFil ="in.txt"
 	; $outFil = "out.txt"
 
-	Local $in = FileRead($inFil)
-	If @error Then
-		MsgBox(16, "Error", "Could not read file 'in.txt'.")
-		Return
-	EndIf
+    Local $in = FileRead($inFil)
+    If @error Then
+        MsgBox(16, "Error", "Could not read file 'in.txt'.")
+        Return
+    EndIf
 
-	;; ## string due ##
-	$in = umlaut($in)
-	$in = StripInvalidXML($in)
-	;; ## string due  end ##
+;; ## string due ##
+    $in = umlaut($in)
+    $in = StripInvalidXML($in)
+;; ## string due  end ##
 
-	; Write the result to "out.txt"
-	FileDelete($outFil)
-	FileWrite($outFil, $in)
-	If @error Then
-		MsgBox(16, "Error", "Could not write to 'out.txt'." & $outFil)
-	Else
-		MsgBox(64, "Success", "Text converted and saved to 'out.txt'." & $outFil)
-	EndIf
-EndFunc   ;==>badCharFil
-Func badCharFilUTF($inFil, $outFil)
+    ; Write the result to "out.txt"
+    FileDelete($outFil)
+    FileWrite($outFil, $in)
+    If @error Then
+        MsgBox(16, "Error", "Could not write to 'out.txt'." & $outFil)
+    Else
+        MsgBox(64, "Success", "Text converted and saved to 'out.txt'." & $outFil)
+    EndIf
+EndFunc
+Func badCharFilUTF($inFil , $outFil)
 	;Local $inFil = 'zara.htm'
 	;Local $outFil = 'zara2.htm'
 	; 1. Datei mit expliziter Kodierung (UTF-8 ohne BOM) öffnen
@@ -152,14 +152,14 @@ Func badCharFilUTF($inFil, $outFil)
 	Local $in = FileRead($hFile)
 	FileClose($hFile)
 
-	;; ## string due ##
-	$in = umlaut($in)
-	$in = StripInvalidXML($in)
-	;; ## string due  end ##
+;; ## string due ##
+    $in = umlaut($in)
+    $in = StripInvalidXML($in)
+;; ## string due  end ##
 
 	; Datei öffnen zum Schreiben (wird überschrieben). Wir schreiben hier einfach als ANSI/Standard,
 	; da alle Umlaute in ASCII-Zeichen ('ae', 'oe', etc.) umgewandelt wurden.
-	FileDelete($outFil)
+    FileDelete($outFil)
 	Local $hFile_out = FileOpen($outFil, 1)  ; after DEL append reicht
 	If $hFile_out = -1 Then
 		MsgBox(16, "Fehler", "Ausgabedatei konnte nicht geschrieben werden.")
@@ -170,5 +170,5 @@ Func badCharFilUTF($inFil, $outFil)
 	FileClose($hFile_out)
 
 	MsgBox(64, "Fertig", "Die Datei wurde erfolgreich verarbeitet und in '" & $outFil & "' gespeichert.")
-EndFunc   ;==>badCharFilUTF
+EndFunc
 
